@@ -7,7 +7,7 @@ from typing import Any, override
 
 import h5py
 import numpy as np
-from ods_exd_api_box import ExdFileInterface, exd_api, ods
+from ods_exd_api_box import ExdFileInterface, NotMyFileError, exd_api, ods
 
 FILE_TYPE_KEY = "FileType/DsigntH5FileType"
 EXPECTED_FILE_TYPE = "DSignT Waveform"
@@ -55,22 +55,22 @@ class ExternalDataFile(ExdFileInterface):
         """
         if FILE_TYPE_KEY not in self.hdf5:
             self.hdf5.close()
-            raise ValueError(f"Not a microUniDAQ file: missing '{FILE_TYPE_KEY}'")
+            raise NotMyFileError(f"Not a microUniDAQ file: missing '{FILE_TYPE_KEY}'")
 
         file_type_value = _to_str(self.hdf5[FILE_TYPE_KEY][()])
         if file_type_value != EXPECTED_FILE_TYPE:
             self.hdf5.close()
-            raise ValueError(
+            raise NotMyFileError(
                 f"Not a microUniDAQ file: expected '{EXPECTED_FILE_TYPE}', got '{file_type_value}'"
             )
 
         if "Measurement" not in self.hdf5:
             self.hdf5.close()
-            raise ValueError("Not a microUniDAQ file: missing 'Measurement' group")
+            raise NotMyFileError("Not a microUniDAQ file: missing 'Measurement' group")
 
         if "Waveforms" not in self.hdf5:
             self.hdf5.close()
-            raise ValueError("Not a microUniDAQ file: missing 'Waveforms' group")
+            raise NotMyFileError("Not a microUniDAQ file: missing 'Waveforms' group")
 
     def _get_channel_pairs(self) -> list[tuple[str, str]]:
         """Return sorted (group_name, dataset_name) pairs from 'Waveforms/'.
