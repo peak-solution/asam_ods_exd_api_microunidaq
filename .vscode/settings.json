@@ -1,0 +1,25 @@
+{
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "files.trimTrailingWhitespace": true,
+    "files.autoSave": "onFocusChange",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always"
+    },
+    "cSpell.words": [
+        "BYTESTR",
+        "CCBLOCK",
+        "DCOMPLEX",
+        "dtypes",
+        "tobytes"
+    ],
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.unittestEnabled": true
+}
