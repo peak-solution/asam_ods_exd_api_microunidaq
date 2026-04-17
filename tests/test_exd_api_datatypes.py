@@ -7,7 +7,13 @@ from pathlib import Path
 import h5py
 import numpy as np
 from google.protobuf.json_format import MessageToJson
-from ods_exd_api_box import ExternalDataReader, FileHandlerRegistry, exd_api, ods
+from ods_exd_api_box import (
+    ExternalDataReader,
+    FileHandlerRegistry,
+    NotMyFileError,
+    exd_api,
+    ods,
+)
 
 from external_data_file import ExternalDataFile
 
@@ -63,16 +69,25 @@ class TestDataTypes(unittest.TestCase):
             _make_hdf5(file_path)
 
             service = ExternalDataReader()
-            handle = service.Open(exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""), None)
+            handle = service.Open(
+                exd_api.Identifier(
+                    url=Path(file_path).resolve().as_uri(), parameters=""
+                ),
+                None,
+            )
             try:
-                structure = service.GetStructure(exd_api.StructureRequest(handle=handle), None)
+                structure = service.GetStructure(
+                    exd_api.StructureRequest(handle=handle), None
+                )
                 self.log.info(MessageToJson(structure))
 
                 time_ch = structure.groups[0].channels[0]
                 self.assertEqual(time_ch.name, "Time")
                 self.assertEqual(time_ch.data_type, ods.DataTypeEnum.DT_DOUBLE)
                 self.assertTrue("independent" in time_ch.attributes.variables)
-                self.assertEqual(1, time_ch.attributes.variables["independent"].long_array.values[0])
+                self.assertEqual(
+                    1, time_ch.attributes.variables["independent"].long_array.values[0]
+                )
             finally:
                 service.Close(handle, None)
 
@@ -83,9 +98,16 @@ class TestDataTypes(unittest.TestCase):
             _make_hdf5(file_path)
 
             service = ExternalDataReader()
-            handle = service.Open(exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""), None)
+            handle = service.Open(
+                exd_api.Identifier(
+                    url=Path(file_path).resolve().as_uri(), parameters=""
+                ),
+                None,
+            )
             try:
-                structure = service.GetStructure(exd_api.StructureRequest(handle=handle), None)
+                structure = service.GetStructure(
+                    exd_api.StructureRequest(handle=handle), None
+                )
 
                 data_ch = structure.groups[0].channels[1]
                 self.assertEqual(data_ch.name, "TestChannel")
@@ -103,7 +125,9 @@ class TestDataTypes(unittest.TestCase):
                 channels=[
                     {
                         "label": "TestCh",
-                        "samples": np.array([10.0, 20.0, 30.0, 40.0, 50.0], dtype=np.float32),
+                        "samples": np.array(
+                            [10.0, 20.0, 30.0, 40.0, 50.0], dtype=np.float32
+                        ),
                         "xinc": 0.01,
                         "xunits": "s",
                         "yunits": "mV",
@@ -112,17 +136,29 @@ class TestDataTypes(unittest.TestCase):
             )
 
             service = ExternalDataReader()
-            handle = service.Open(exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""), None)
+            handle = service.Open(
+                exd_api.Identifier(
+                    url=Path(file_path).resolve().as_uri(), parameters=""
+                ),
+                None,
+            )
             try:
                 values = service.GetValues(
-                    exd_api.ValuesRequest(handle=handle, group_id=0, start=0, limit=5, channel_ids=[0]), None
+                    exd_api.ValuesRequest(
+                        handle=handle, group_id=0, start=0, limit=5, channel_ids=[0]
+                    ),
+                    None,
                 )
-                self.assertEqual(values.channels[0].values.data_type, ods.DataTypeEnum.DT_DOUBLE)
+                self.assertEqual(
+                    values.channels[0].values.data_type, ods.DataTypeEnum.DT_DOUBLE
+                )
                 expected = [0.0, 0.01, 0.02, 0.03, 0.04]
                 for i, (actual, exp) in enumerate(
                     zip(values.channels[0].values.double_array.values, expected)
                 ):
-                    self.assertAlmostEqual(float(actual), exp, places=10, msg=f"index {i}")
+                    self.assertAlmostEqual(
+                        float(actual), exp, places=10, msg=f"index {i}"
+                    )
             finally:
                 service.Close(handle, None)
 
@@ -134,7 +170,12 @@ class TestDataTypes(unittest.TestCase):
 
             service = ExternalDataReader()
             with self.assertRaises(Exception):
-                service.Open(exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""), None)
+                service.Open(
+                    exd_api.Identifier(
+                        url=Path(file_path).resolve().as_uri(), parameters=""
+                    ),
+                    None,
+                )
 
     def test_missing_filetype_rejected(self):
         """An HDF5 file without FileType/DsigntH5FileType should be rejected."""
@@ -149,11 +190,18 @@ class TestDataTypes(unittest.TestCase):
                 g.attrs["XInc"] = np.float64(0.001)
                 g.attrs["XUnits"] = "s"
                 g.attrs["YUnits"] = "V"
-                wf.create_dataset("Channel 0 Data", data=np.array([1, 2, 3], dtype=np.float32))
+                wf.create_dataset(
+                    "Channel 0 Data", data=np.array([1, 2, 3], dtype=np.float32)
+                )
 
             service = ExternalDataReader()
             with self.assertRaises(Exception):
-                service.Open(exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""), None)
+                service.Open(
+                    exd_api.Identifier(
+                        url=Path(file_path).resolve().as_uri(), parameters=""
+                    ),
+                    None,
+                )
 
     def test_channel_units(self):
         """XUnits and YUnits should map to channel unit_string."""
@@ -161,17 +209,79 @@ class TestDataTypes(unittest.TestCase):
             file_path = os.path.join(temp_dir, "units.hdf5")
             _make_hdf5(
                 file_path,
-                channels=[{
-                    "label": "Accel", "samples": np.array([1.0], dtype=np.float32),
-                    "xinc": 0.001, "xunits": "ms", "yunits": "g",
-                }],
+                channels=[
+                    {
+                        "label": "Accel",
+                        "samples": np.array([1.0], dtype=np.float32),
+                        "xinc": 0.001,
+                        "xunits": "ms",
+                        "yunits": "g",
+                    }
+                ],
             )
 
             service = ExternalDataReader()
-            handle = service.Open(exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""), None)
+            handle = service.Open(
+                exd_api.Identifier(
+                    url=Path(file_path).resolve().as_uri(), parameters=""
+                ),
+                None,
+            )
             try:
-                structure = service.GetStructure(exd_api.StructureRequest(handle=handle), None)
+                structure = service.GetStructure(
+                    exd_api.StructureRequest(handle=handle), None
+                )
                 self.assertEqual(structure.groups[0].channels[0].unit_string, "ms")
                 self.assertEqual(structure.groups[0].channels[1].unit_string, "g")
             finally:
                 service.Close(handle, None)
+
+
+class TestNotMyFileError(unittest.TestCase):
+    """Tests that NotMyFileError is raised for each invalid HDF5 layout."""
+
+    def setUp(self):
+        FileHandlerRegistry.register(file_type_name="test", factory=ExternalDataFile)
+
+    def _open(self, file_path: str) -> None:
+        ExternalDataFile.create(file_path, "")
+
+    def test_missing_filetype_key(self):
+        """Missing FileType/DsigntH5FileType dataset raises NotMyFileError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "test.hdf5")
+            with h5py.File(path, "w") as f:
+                f.create_group("Measurement")
+                f.create_group("Waveforms")
+            with self.assertRaises(NotMyFileError):
+                self._open(path)
+
+    def test_wrong_filetype_value(self):
+        """A FileType marker with an unexpected value raises NotMyFileError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "test.hdf5")
+            _make_hdf5(path, file_type="SomeOtherFormat")
+            with self.assertRaises(NotMyFileError):
+                self._open(path)
+
+    def test_missing_measurement_group(self):
+        """Missing top-level Measurement group raises NotMyFileError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "test.hdf5")
+            with h5py.File(path, "w") as f:
+                ft = f.create_group("FileType")
+                ft.create_dataset("DsigntH5FileType", data=b"DSignT Waveform")
+                f.create_group("Waveforms")
+            with self.assertRaises(NotMyFileError):
+                self._open(path)
+
+    def test_missing_waveforms_group(self):
+        """Missing top-level Waveforms group raises NotMyFileError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "test.hdf5")
+            with h5py.File(path, "w") as f:
+                ft = f.create_group("FileType")
+                ft.create_dataset("DsigntH5FileType", data=b"DSignT Waveform")
+                f.create_group("Measurement")
+            with self.assertRaises(NotMyFileError):
+                self._open(path)
