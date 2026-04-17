@@ -1,5 +1,5 @@
 {
-    "name": "MDF4 EXD API Dev Container",
+    "name": "MICROUNIDAQ EXD API Dev Container",
     "image": "mcr.microsoft.com/devcontainers/python:3.14-bookworm",
     "features": {
         "docker-in-docker": {
