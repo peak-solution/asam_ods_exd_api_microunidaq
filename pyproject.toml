@@ -25,8 +25,11 @@ dependencies = [
 [dependency-groups]
 dev = [
     "coverage>=7.0",
+    "ipywidgets>=8.1.8",
+    "anywidget>=0.10.0",
     "jupyterlab>=4.0",
     "mypy>=1.5",
+    "plotly>=6.7.0",
     "ruff>=0.1.0",
 ]
 
