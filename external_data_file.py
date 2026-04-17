@@ -60,9 +60,7 @@ class ExternalDataFile(ExdFileInterface):
         file_type_value = _to_str(self.hdf5[FILE_TYPE_KEY][()])
         if file_type_value != EXPECTED_FILE_TYPE:
             self.hdf5.close()
-            raise NotMyFileError(
-                f"Not a microUniDAQ file: expected '{EXPECTED_FILE_TYPE}', got '{file_type_value}'"
-            )
+            raise NotMyFileError(f"Not a microUniDAQ file: expected '{EXPECTED_FILE_TYPE}', got '{file_type_value}'")
 
         if "Measurement" not in self.hdf5:
             self.hdf5.close()
@@ -81,9 +79,7 @@ class ExternalDataFile(ExdFileInterface):
         Raises ValueError when a channel group has no matching data dataset.
         """
         waveforms = self.hdf5["Waveforms"]
-        group_names = [
-            name for name in waveforms.keys() if isinstance(waveforms[name], h5py.Group)
-        ]
+        group_names = [name for name in waveforms.keys() if isinstance(waveforms[name], h5py.Group)]
         group_names.sort(key=_channel_sort_key)
 
         pairs: list[tuple[str, str]] = []
@@ -91,16 +87,12 @@ class ExternalDataFile(ExdFileInterface):
             dname = f"{gname} Data"
             if dname not in waveforms or not isinstance(waveforms[dname], h5py.Dataset):
                 self.hdf5.close()
-                raise ValueError(
-                    f"Not a microUniDAQ file: missing dataset '{dname}' for group '{gname}'"
-                )
+                raise ValueError(f"Not a microUniDAQ file: missing dataset '{dname}' for group '{gname}'")
             pairs.append((gname, dname))
 
         if not pairs:
             self.hdf5.close()
-            raise ValueError(
-                "Not a microUniDAQ file: no channel groups found in 'Waveforms'"
-            )
+            raise ValueError("Not a microUniDAQ file: no channel groups found in 'Waveforms'")
 
         return pairs
 
@@ -119,9 +111,7 @@ class ExternalDataFile(ExdFileInterface):
         for key in sorted(measurement.keys()):
             ds = measurement[key]
             if isinstance(ds, h5py.Dataset):
-                structure.attributes.variables[key].string_array.values.append(
-                    _to_str(ds[()])
-                )
+                structure.attributes.variables[key].string_array.values.append(_to_str(ds[()]))
 
         # Resolve labels (for group and channel names) with uniqueness check
         labels: list[str] = []
@@ -155,18 +145,14 @@ class ExternalDataFile(ExdFileInterface):
 
             # Store all HDF5 channel-group attributes as group attributes
             for attr_name in sorted(attrs.keys()):
-                new_group.attributes.variables[attr_name].string_array.values.append(
-                    _to_str(attrs[attr_name])
-                )
+                new_group.attributes.variables[attr_name].string_array.values.append(_to_str(attrs[attr_name]))
 
             # Channel 0: Time (independent)
             time_channel = exd_api.StructureResult.Channel()
             time_channel.name = "Time"
             time_channel.id = 0
             time_channel.data_type = ods.DataTypeEnum.DT_DOUBLE
-            time_channel.unit_string = (
-                _to_str(attrs["XUnits"]) if "XUnits" in attrs else ""
-            )
+            time_channel.unit_string = _to_str(attrs["XUnits"]) if "XUnits" in attrs else ""
             time_channel.attributes.variables["independent"].long_array.values.append(1)
             new_group.channels.append(time_channel)
 
@@ -175,9 +161,7 @@ class ExternalDataFile(ExdFileInterface):
             data_channel.name = resolved_labels[group_index]
             data_channel.id = 1
             data_channel.data_type = ods.DataTypeEnum.DT_FLOAT
-            data_channel.unit_string = (
-                _to_str(attrs["YUnits"]) if "YUnits" in attrs else ""
-            )
+            data_channel.unit_string = _to_str(attrs["YUnits"]) if "YUnits" in attrs else ""
             new_group.channels.append(data_channel)
 
             structure.groups.append(new_group)
@@ -210,9 +194,7 @@ class ExternalDataFile(ExdFileInterface):
             if channel_id == 0:
                 # Time channel: computed from XInc
                 new_channel_values.values.data_type = ods.DataTypeEnum.DT_DOUBLE
-                time_values = (
-                    np.arange(request.start, end_index, dtype=np.float64) * xinc
-                )
+                time_values = np.arange(request.start, end_index, dtype=np.float64) * xinc
                 new_channel_values.values.double_array.values[:] = time_values
             elif channel_id == 1:
                 # Data channel: read from dataset
