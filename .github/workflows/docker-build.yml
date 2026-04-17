@@ -35,5 +35,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/asam-ods-exd-api-mdf4:latest
-            ghcr.io/${{ github.repository_owner }}/asam-ods-exd-api-mdf4:${{ env.VERSION }}
+            ghcr.io/${{ github.repository_owner }}/asam-ods-exd-api-microunidaq:latest
+            ghcr.io/${{ github.repository_owner }}/asam-ods-exd-api-microunidaq:${{ env.VERSION }}
