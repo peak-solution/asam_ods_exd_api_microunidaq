@@ -70,24 +70,18 @@ class TestDataTypes(unittest.TestCase):
 
             service = ExternalDataReader()
             handle = service.Open(
-                exd_api.Identifier(
-                    url=Path(file_path).resolve().as_uri(), parameters=""
-                ),
+                exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""),
                 None,
             )
             try:
-                structure = service.GetStructure(
-                    exd_api.StructureRequest(handle=handle), None
-                )
+                structure = service.GetStructure(exd_api.StructureRequest(handle=handle), None)
                 self.log.info(MessageToJson(structure))
 
                 time_ch = structure.groups[0].channels[0]
                 self.assertEqual(time_ch.name, "Time")
                 self.assertEqual(time_ch.data_type, ods.DataTypeEnum.DT_DOUBLE)
                 self.assertTrue("independent" in time_ch.attributes.variables)
-                self.assertEqual(
-                    1, time_ch.attributes.variables["independent"].long_array.values[0]
-                )
+                self.assertEqual(1, time_ch.attributes.variables["independent"].long_array.values[0])
             finally:
                 service.Close(handle, None)
 
@@ -99,15 +93,11 @@ class TestDataTypes(unittest.TestCase):
 
             service = ExternalDataReader()
             handle = service.Open(
-                exd_api.Identifier(
-                    url=Path(file_path).resolve().as_uri(), parameters=""
-                ),
+                exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""),
                 None,
             )
             try:
-                structure = service.GetStructure(
-                    exd_api.StructureRequest(handle=handle), None
-                )
+                structure = service.GetStructure(exd_api.StructureRequest(handle=handle), None)
 
                 data_ch = structure.groups[0].channels[1]
                 self.assertEqual(data_ch.name, "TestChannel")
@@ -125,9 +115,7 @@ class TestDataTypes(unittest.TestCase):
                 channels=[
                     {
                         "label": "TestCh",
-                        "samples": np.array(
-                            [10.0, 20.0, 30.0, 40.0, 50.0], dtype=np.float32
-                        ),
+                        "samples": np.array([10.0, 20.0, 30.0, 40.0, 50.0], dtype=np.float32),
                         "xinc": 0.01,
                         "xunits": "s",
                         "yunits": "mV",
@@ -137,28 +125,18 @@ class TestDataTypes(unittest.TestCase):
 
             service = ExternalDataReader()
             handle = service.Open(
-                exd_api.Identifier(
-                    url=Path(file_path).resolve().as_uri(), parameters=""
-                ),
+                exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""),
                 None,
             )
             try:
                 values = service.GetValues(
-                    exd_api.ValuesRequest(
-                        handle=handle, group_id=0, start=0, limit=5, channel_ids=[0]
-                    ),
+                    exd_api.ValuesRequest(handle=handle, group_id=0, start=0, limit=5, channel_ids=[0]),
                     None,
                 )
-                self.assertEqual(
-                    values.channels[0].values.data_type, ods.DataTypeEnum.DT_DOUBLE
-                )
+                self.assertEqual(values.channels[0].values.data_type, ods.DataTypeEnum.DT_DOUBLE)
                 expected = [0.0, 0.01, 0.02, 0.03, 0.04]
-                for i, (actual, exp) in enumerate(
-                    zip(values.channels[0].values.double_array.values, expected)
-                ):
-                    self.assertAlmostEqual(
-                        float(actual), exp, places=10, msg=f"index {i}"
-                    )
+                for i, (actual, exp) in enumerate(zip(values.channels[0].values.double_array.values, expected)):
+                    self.assertAlmostEqual(float(actual), exp, places=10, msg=f"index {i}")
             finally:
                 service.Close(handle, None)
 
@@ -171,9 +149,7 @@ class TestDataTypes(unittest.TestCase):
             service = ExternalDataReader()
             with self.assertRaises(Exception):
                 service.Open(
-                    exd_api.Identifier(
-                        url=Path(file_path).resolve().as_uri(), parameters=""
-                    ),
+                    exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""),
                     None,
                 )
 
@@ -190,16 +166,12 @@ class TestDataTypes(unittest.TestCase):
                 g.attrs["XInc"] = np.float64(0.001)
                 g.attrs["XUnits"] = "s"
                 g.attrs["YUnits"] = "V"
-                wf.create_dataset(
-                    "Channel 0 Data", data=np.array([1, 2, 3], dtype=np.float32)
-                )
+                wf.create_dataset("Channel 0 Data", data=np.array([1, 2, 3], dtype=np.float32))
 
             service = ExternalDataReader()
             with self.assertRaises(Exception):
                 service.Open(
-                    exd_api.Identifier(
-                        url=Path(file_path).resolve().as_uri(), parameters=""
-                    ),
+                    exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""),
                     None,
                 )
 
@@ -222,15 +194,11 @@ class TestDataTypes(unittest.TestCase):
 
             service = ExternalDataReader()
             handle = service.Open(
-                exd_api.Identifier(
-                    url=Path(file_path).resolve().as_uri(), parameters=""
-                ),
+                exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters=""),
                 None,
             )
             try:
-                structure = service.GetStructure(
-                    exd_api.StructureRequest(handle=handle), None
-                )
+                structure = service.GetStructure(exd_api.StructureRequest(handle=handle), None)
                 self.assertEqual(structure.groups[0].channels[0].unit_string, "ms")
                 self.assertEqual(structure.groups[0].channels[1].unit_string, "g")
             finally:

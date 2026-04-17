@@ -14,9 +14,7 @@ class TestDockerContainer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Docker-Image bauen
-        subprocess.run(
-            ["docker", "build", "-t", "asam-ods-exd-api-microunidaq", "."], check=True
-        )
+        subprocess.run(["docker", "build", "-t", "asam-ods-exd-api-microunidaq", "."], check=True)
 
         # Remove any stale container with the same name
         subprocess.run(
@@ -25,9 +23,7 @@ class TestDockerContainer(unittest.TestCase):
             stderr=subprocess.DEVNULL,
         )
 
-        example_file_path = pathlib.Path.joinpath(
-            pathlib.Path(__file__).parent.resolve(), "..", "data"
-        )
+        example_file_path = pathlib.Path.joinpath(pathlib.Path(__file__).parent.resolve(), "..", "data")
         data_folder = pathlib.Path(example_file_path).absolute().resolve()
         cp = subprocess.run(
             [
@@ -86,13 +82,9 @@ class TestDockerContainer(unittest.TestCase):
         with grpc.insecure_channel("localhost:50051") as channel:
             service = exd_grpc.ExternalDataReaderStub(channel)
 
-            handle = service.Open(
-                exd_api.Identifier(url="/data/test5.hdf5", parameters=""), None
-            )
+            handle = service.Open(exd_api.Identifier(url="/data/test5.hdf5", parameters=""), None)
             try:
-                structure = service.GetStructure(
-                    exd_api.StructureRequest(handle=handle), None
-                )
+                structure = service.GetStructure(exd_api.StructureRequest(handle=handle), None)
                 logging.info(MessageToJson(structure))
 
                 self.assertEqual(structure.name, "test5.hdf5")
@@ -110,15 +102,11 @@ class TestDockerContainer(unittest.TestCase):
         with grpc.insecure_channel("localhost:50051") as channel:
             service = exd_grpc.ExternalDataReaderStub(channel)
 
-            handle = service.Open(
-                exd_api.Identifier(url="/data/test5.hdf5", parameters=""), None
-            )
+            handle = service.Open(exd_api.Identifier(url="/data/test5.hdf5", parameters=""), None)
 
             try:
                 values = service.GetValues(
-                    exd_api.ValuesRequest(
-                        handle=handle, group_id=0, channel_ids=[0, 1], start=0, limit=4
-                    ),
+                    exd_api.ValuesRequest(handle=handle, group_id=0, channel_ids=[0, 1], start=0, limit=4),
                     None,
                 )
                 self.assertEqual(values.id, 0)
@@ -128,18 +116,14 @@ class TestDockerContainer(unittest.TestCase):
                 logging.info(MessageToJson(values))
 
                 # Channel 0: Time (DT_DOUBLE), computed from XInc=2e-05
-                self.assertEqual(
-                    values.channels[0].values.data_type, ods.DataTypeEnum.DT_DOUBLE
-                )
+                self.assertEqual(values.channels[0].values.data_type, ods.DataTypeEnum.DT_DOUBLE)
                 time_values = list(values.channels[0].values.double_array.values)
                 expected_time = [0.0, 2e-05, 4e-05, 6e-05]
                 self.assertEqual(len(time_values), len(expected_time))
                 for actual, expected in zip(time_values, expected_time):
                     self.assertAlmostEqual(actual, expected, places=15)
                 # Channel 1: Data (DT_FLOAT)
-                self.assertEqual(
-                    values.channels[1].values.data_type, ods.DataTypeEnum.DT_FLOAT
-                )
+                self.assertEqual(values.channels[1].values.data_type, ods.DataTypeEnum.DT_FLOAT)
                 self.assertEqual(len(values.channels[1].values.float_array.values), 4)
             finally:
                 service.Close(handle, None)

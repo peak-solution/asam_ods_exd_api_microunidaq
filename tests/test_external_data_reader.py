@@ -80,9 +80,7 @@ class TestExternalDataReader(unittest.TestCase):
             file_path = os.path.join(temp_dir, "test.hdf5")
             _make_hdf5(file_path)
 
-            identifier = exd_api.Identifier(
-                url=Path(file_path).resolve().as_uri(), parameters=""
-            )
+            identifier = exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters="")
             try:
                 handle = self.service.Open(identifier, None)
                 self.assertIsNotNone(handle.uuid)
@@ -90,18 +88,14 @@ class TestExternalDataReader(unittest.TestCase):
                 self.service.Close(handle, None)
 
     def test_open_non_existing_file(self):
-        identifier = exd_api.Identifier(
-            url="file:///non_existing_file.hdf5", parameters=""
-        )
+        identifier = exd_api.Identifier(url="file:///non_existing_file.hdf5", parameters="")
         with self.assertRaises(grpc.RpcError) as _:
             self.service.Open(identifier, self.mock_context)
 
         self.assertEqual(self.mock_context.code(), grpc.StatusCode.NOT_FOUND)
 
     def test_simple_example(self):
-        main_file_path = Path.joinpath(
-            Path(__file__).parent.resolve(), "..", "data", "test5.hdf5"
-        )
+        main_file_path = Path.joinpath(Path(__file__).parent.resolve(), "..", "data", "test5.hdf5")
         main_file_url = Path(main_file_path).absolute().resolve().as_uri()
 
         main_external_data_reader = ExternalDataReader()
@@ -136,9 +130,7 @@ class TestExternalDataReader(unittest.TestCase):
             file_path = os.path.join(temp_dir, "test.hdf5")
             _make_hdf5(file_path)
 
-            identifier = exd_api.Identifier(
-                url=Path(file_path).resolve().as_uri(), parameters=""
-            )
+            identifier = exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters="")
             handle1 = self.service.Open(identifier, None)
             self.assertIsNotNone(handle1.uuid)
 
@@ -164,14 +156,10 @@ class TestExternalDataReader(unittest.TestCase):
                 },
             )
 
-            identifier = exd_api.Identifier(
-                url=Path(file_path).resolve().as_uri(), parameters=""
-            )
+            identifier = exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters="")
             handle = self.service.Open(identifier, None)
             try:
-                file_content = self.service.GetStructure(
-                    exd_api.StructureRequest(handle=handle), None
-                )
+                file_content = self.service.GetStructure(exd_api.StructureRequest(handle=handle), None)
                 file_attributes = file_content.attributes.variables
 
                 attribute = file_attributes.get("DAQ Device Model")
@@ -188,9 +176,7 @@ class TestExternalDataReader(unittest.TestCase):
 
                 attribute = file_attributes.get("DateTime")
                 self.assertIsNotNone(attribute)
-                self.assertEqual(
-                    attribute.string_array.values[0], "2024-01-15T10:30:00+01:00"
-                )
+                self.assertEqual(attribute.string_array.values[0], "2024-01-15T10:30:00+01:00")
 
                 attribute = file_attributes.get("Operator")
                 self.assertIsNotNone(attribute)
@@ -205,9 +191,7 @@ class TestExternalDataReader(unittest.TestCase):
             file_path = os.path.join(temp_dir, "wrong.hdf5")
             _make_hdf5(file_path, file_type="SomeOtherFormat")
 
-            identifier = exd_api.Identifier(
-                url=Path(file_path).resolve().as_uri(), parameters=""
-            )
+            identifier = exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters="")
             with self.assertRaises(Exception):
                 self.service.Open(identifier, self.mock_context)
 
@@ -220,9 +204,7 @@ class TestExternalDataReader(unittest.TestCase):
                 ft.create_dataset("DsigntH5FileType", data=b"DSignT Waveform")
                 f.create_group("Measurement")
 
-            identifier = exd_api.Identifier(
-                url=Path(file_path).resolve().as_uri(), parameters=""
-            )
+            identifier = exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters="")
             with self.assertRaises(Exception):
                 self.service.Open(identifier, self.mock_context)
 
@@ -234,8 +216,6 @@ class TestExternalDataReader(unittest.TestCase):
                 f.create_group("Measurement")
                 f.create_group("Waveforms")
 
-            identifier = exd_api.Identifier(
-                url=Path(file_path).resolve().as_uri(), parameters=""
-            )
+            identifier = exd_api.Identifier(url=Path(file_path).resolve().as_uri(), parameters="")
             with self.assertRaises(Exception):
                 self.service.Open(identifier, self.mock_context)

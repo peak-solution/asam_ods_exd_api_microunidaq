@@ -104,13 +104,13 @@ name = "asam-ods-exd-api-microunidaq"
 version = "1.0.0"
 source = { editable = "." }
 dependencies = [
-    { name = "anywidget" },
     { name = "h5py" },
     { name = "ods-exd-api-box" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "anywidget" },
     { name = "coverage" },
     { name = "ipywidgets" },
     { name = "jupyterlab" },
@@ -121,13 +121,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "anywidget", specifier = ">=0.10.0" },
     { name = "h5py", specifier = ">=3.0.0" },
     { name = "ods-exd-api-box", specifier = ">=1.3.0,<2.0.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "anywidget", specifier = ">=0.10.0" },
     { name = "coverage", specifier = ">=7.0" },
     { name = "ipywidgets", specifier = ">=8.1.8" },
     { name = "jupyterlab", specifier = ">=4.0" },

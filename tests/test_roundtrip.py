@@ -101,9 +101,7 @@ class TestRoundtrip(unittest.TestCase):
         return os.path.join(self.tmp_dir, name)
 
     def _open(self, path: str):
-        return self.service.Open(
-            exd_api.Identifier(url=_uri(path), parameters=""), None
-        )
+        return self.service.Open(exd_api.Identifier(url=_uri(path), parameters=""), None)
 
     def _structure(self, handle) -> exd_api.StructureResult:
         return self.service.GetStructure(exd_api.StructureRequest(handle=handle), None)
@@ -148,9 +146,7 @@ class TestRoundtrip(unittest.TestCase):
             ch = self._structure(handle).groups[0].channels[1]
             self.assertEqual(ch.data_type, ods.DataTypeEnum.DT_FLOAT)
             result = self._values(handle, 0, [1])
-            self._assert_floats(
-                result.channels[0].values.float_array.values, vals.tolist()
-            )
+            self._assert_floats(result.channels[0].values.float_array.values, vals.tolist())
         finally:
             self.service.Close(handle, None)
 
@@ -168,9 +164,7 @@ class TestRoundtrip(unittest.TestCase):
             self.assertEqual(ch.data_type, ods.DataTypeEnum.DT_DOUBLE)
             result = self._values(handle, 0, [0])
             expected = [i * 0.01 for i in range(5)]
-            self._assert_floats(
-                result.channels[0].values.double_array.values, expected, places=10
-            )
+            self._assert_floats(result.channels[0].values.double_array.values, expected, places=10)
         finally:
             self.service.Close(handle, None)
 
@@ -181,9 +175,7 @@ class TestRoundtrip(unittest.TestCase):
     def test_label_becomes_group_name(self):
         path = _make_hdf5(
             self._path("label.hdf5"),
-            channels=[
-                {"label": "Accelerometer", "samples": np.array([1.0], np.float32)}
-            ],
+            channels=[{"label": "Accelerometer", "samples": np.array([1.0], np.float32)}],
         )
         handle = self._open(path)
         try:
@@ -315,17 +307,13 @@ class TestRoundtrip(unittest.TestCase):
         handle = self._open(path)
         try:
             result = self._values(handle, 0, [1], start=10, limit=5)
-            self._assert_floats(
-                result.channels[0].values.float_array.values, vals[10:15].tolist()
-            )
+            self._assert_floats(result.channels[0].values.float_array.values, vals[10:15].tolist())
         finally:
             self.service.Close(handle, None)
 
     def test_paging_limit_clamps_at_end(self):
         vals = np.array([1.0, 2.0, 3.0], np.float32)
-        path = _make_hdf5(
-            self._path("clamp.hdf5"), channels=[{"label": "ch", "samples": vals}]
-        )
+        path = _make_hdf5(self._path("clamp.hdf5"), channels=[{"label": "ch", "samples": vals}])
         handle = self._open(path)
         try:
             result = self._values(handle, 0, [1], start=0, limit=9999)
@@ -335,9 +323,7 @@ class TestRoundtrip(unittest.TestCase):
 
     def test_paging_first_row_only(self):
         vals = np.array([10.0, 20.0, 30.0], np.float32)
-        path = _make_hdf5(
-            self._path("first.hdf5"), channels=[{"label": "ch", "samples": vals}]
-        )
+        path = _make_hdf5(self._path("first.hdf5"), channels=[{"label": "ch", "samples": vals}])
         handle = self._open(path)
         try:
             result = self._values(handle, 0, [1], start=0, limit=1)
@@ -347,9 +333,7 @@ class TestRoundtrip(unittest.TestCase):
 
     def test_paging_last_row(self):
         vals = np.array([10.0, 20.0, 30.0], np.float32)
-        path = _make_hdf5(
-            self._path("last.hdf5"), channels=[{"label": "ch", "samples": vals}]
-        )
+        path = _make_hdf5(self._path("last.hdf5"), channels=[{"label": "ch", "samples": vals}])
         handle = self._open(path)
         try:
             result = self._values(handle, 0, [1], start=2, limit=1)
@@ -370,13 +354,9 @@ class TestRoundtrip(unittest.TestCase):
             result = self._values(handle, 0, [0, 1], start=5, limit=4)
             # Time
             expected_time = [i * 0.1 for i in range(5, 9)]
-            self._assert_floats(
-                result.channels[0].values.double_array.values, expected_time
-            )
+            self._assert_floats(result.channels[0].values.double_array.values, expected_time)
             # Data
-            self._assert_floats(
-                result.channels[1].values.float_array.values, vals[5:9].tolist()
-            )
+            self._assert_floats(result.channels[1].values.float_array.values, vals[5:9].tolist())
         finally:
             self.service.Close(handle, None)
 
@@ -441,9 +421,7 @@ class TestRoundtrip(unittest.TestCase):
             grp = self._structure(handle).groups[0]
             time_ch = grp.channels[0]
             self.assertIn("independent", time_ch.attributes.variables)
-            self.assertEqual(
-                time_ch.attributes.variables["independent"].long_array.values[0], 1
-            )
+            self.assertEqual(time_ch.attributes.variables["independent"].long_array.values[0], 1)
             data_ch = grp.channels[1]
             self.assertNotIn("independent", data_ch.attributes.variables)
         finally:
@@ -478,10 +456,7 @@ class TestRoundtrip(unittest.TestCase):
         """ValuesResult.id must equal the requested group_id."""
         path = _make_hdf5(
             self._path("grpid.hdf5"),
-            channels=[
-                {"label": f"ch{i}", "samples": np.array([float(i)], np.float32)}
-                for i in range(3)
-            ],
+            channels=[{"label": f"ch{i}", "samples": np.array([float(i)], np.float32)} for i in range(3)],
         )
         handle = self._open(path)
         try:
@@ -503,9 +478,7 @@ class TestRoundtrip(unittest.TestCase):
         handle = self._open(path)
         try:
             attrs = self._structure(handle).attributes.variables
-            self.assertEqual(
-                attrs["DAQ Device Model"].string_array.values[0], "myModel"
-            )
+            self.assertEqual(attrs["DAQ Device Model"].string_array.values[0], "myModel")
             self.assertEqual(attrs["Operator"].string_array.values[0], "Jane")
         finally:
             self.service.Close(handle, None)

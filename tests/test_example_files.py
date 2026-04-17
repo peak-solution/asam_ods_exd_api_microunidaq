@@ -20,25 +20,17 @@ class TestExampleFiles(unittest.TestCase):
 
     def __load_structure(self, example_file_uri):
         service = ExternalDataReader()
-        handle = service.Open(
-            exd_api.Identifier(url=example_file_uri, parameters=""), None
-        )
+        handle = service.Open(exd_api.Identifier(url=example_file_uri, parameters=""), None)
         try:
-            structure = service.GetStructure(
-                exd_api.StructureRequest(handle=handle), None
-            )
+            structure = service.GetStructure(exd_api.StructureRequest(handle=handle), None)
             return structure
         finally:
             service.Close(handle, None)
 
     def test_files(self):
         """test loops over all files and checks if values do match info in structure"""
-        data_folder = pathlib.Path.joinpath(
-            pathlib.Path(__file__).parent.resolve(), "..", "data"
-        )
-        example_files = [
-            y for x in os.walk(data_folder) for y in glob(os.path.join(x[0], "*.hdf5"))
-        ]
+        data_folder = pathlib.Path.joinpath(pathlib.Path(__file__).parent.resolve(), "..", "data")
+        example_files = [y for x in os.walk(data_folder) for y in glob(os.path.join(x[0], "*.hdf5"))]
 
         self.assertGreater(len(example_files), 0, "No HDF5 example files found")
 
@@ -55,9 +47,7 @@ class TestExampleFiles(unittest.TestCase):
 
     def test_file(self):
         """Check a single file"""
-        example_file = pathlib.Path.joinpath(
-            pathlib.Path(__file__).parent.resolve(), "..", "data", "test5.hdf5"
-        )
+        example_file = pathlib.Path.joinpath(pathlib.Path(__file__).parent.resolve(), "..", "data", "test5.hdf5")
         assert example_file.exists()
         example_file_uri = pathlib.Path(example_file).absolute().resolve().as_uri()
         self.__check_file_including_bulk(example_file_uri)
@@ -71,9 +61,7 @@ class TestExampleFiles(unittest.TestCase):
 
         self.log.info("Check bulk load")
         service = ExternalDataReader()
-        handle = service.Open(
-            exd_api.Identifier(url=example_file_uri, parameters=""), None
-        )
+        handle = service.Open(exd_api.Identifier(url=example_file_uri, parameters=""), None)
         try:
             for group in structure.groups:
                 channel_ids = []
@@ -92,15 +80,11 @@ class TestExampleFiles(unittest.TestCase):
                 for values_channel_index, values_channel in enumerate(values.channels):
                     structure_channel = group.channels[values_channel_index]
                     self.assertEqual(values_channel.id, structure_channel.id)
-                    self.assertEqual(
-                        values_channel.values.data_type, structure_channel.data_type
-                    )
+                    self.assertEqual(values_channel.values.data_type, structure_channel.data_type)
                     if ods.DataTypeEnum.DT_COMPLEX == values_channel.values.data_type:
                         vals = values_channel.values.float_array.values
                         self.assertEqual(len(vals), group.number_of_rows * 2)
-                    elif (
-                        ods.DataTypeEnum.DT_DCOMPLEX == values_channel.values.data_type
-                    ):
+                    elif ods.DataTypeEnum.DT_DCOMPLEX == values_channel.values.data_type:
                         vals = values_channel.values.double_array.values
                         self.assertEqual(len(vals), group.number_of_rows * 2)
                     elif ods.DataTypeEnum.DT_BYTE == values_channel.values.data_type:
@@ -112,9 +96,7 @@ class TestExampleFiles(unittest.TestCase):
                     elif ods.DataTypeEnum.DT_LONG == values_channel.values.data_type:
                         vals = values_channel.values.long_array.values
                         self.assertEqual(len(vals), group.number_of_rows)
-                    elif (
-                        ods.DataTypeEnum.DT_LONGLONG == values_channel.values.data_type
-                    ):
+                    elif ods.DataTypeEnum.DT_LONGLONG == values_channel.values.data_type:
                         vals = values_channel.values.longlong_array.values
                         self.assertEqual(len(vals), group.number_of_rows)
                     elif ods.DataTypeEnum.DT_FLOAT == values_channel.values.data_type:
@@ -136,8 +118,6 @@ class TestExampleFiles(unittest.TestCase):
                         vals = values_channel.values.boolean_array.values
                         self.assertEqual(len(vals), group.number_of_rows)
                     else:
-                        self.assertFalse(
-                            True, f"Unknown type {values_channel.values.data_type}"
-                        )
+                        self.assertFalse(True, f"Unknown type {values_channel.values.data_type}")
         finally:
             service.Close(handle, None)
